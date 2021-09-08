@@ -8,9 +8,12 @@ export interface ClassType {
 class AirtableHelper {
 
     public static async LoadDataUsingAPI(studentName: string) {
+        const API_KEY = "<Replace ID Here>";
+        const BASE_ID = "<Replace ID Here>";
+
         const result: ClassType[] = [];
         const Airtable = require('airtable');
-        const base: Base = new Airtable({ apiKey: 'keyzQvBweHZ7S3CVE' }).base('app8ZbcPx7dkpOnP0');
+        const base: Base = new Airtable({ apiKey: API_KEY }).base(BASE_ID);
         const tableStudents: Table<FieldSet> = base('Students');
         const tableClasses: Table<FieldSet> = base('Classes');
         const studentData: Record<FieldSet> = (await tableStudents.select({
@@ -41,7 +44,6 @@ class AirtableHelper {
         for (let i = 0; i < students.length; i++) {
             finalObject.studentNames.push(await AirtableHelper.getNameFromId(studentsTable, students[i]) as string);
         }
-        // console.log(JSON.stringify(finalObject));
         return finalObject;
     }
 
