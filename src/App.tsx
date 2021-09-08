@@ -1,22 +1,21 @@
-import React, { Component } from 'react'
-import './App.css';
-import ClassItem from './components/ClassItem';
-import StudentForm from './components/StudentForm';
+import React, { Component } from "react";
+import "./App.css";
+import ClassList from "./components/ClassesLists";
+import StudentForm from "./components/StudentForm";
 
-interface MyProps {
-};
+interface MyProps {}
 
 interface MyState {
-  loggedIn: boolean,
-  studentName: string
-};
+  loggedIn: boolean;
+  studentName: string;
+}
 
 class App extends Component<MyProps, MyState> {
   constructor(props: MyProps) {
     super(props);
     this.state = {
       loggedIn: false,
-      studentName: ''
+      studentName: "",
     };
   }
 
@@ -25,26 +24,28 @@ class App extends Component<MyProps, MyState> {
       loggedIn: true,
       studentName: name,
     });
-  }
+  };
 
   onLoggedOut = () => {
     this.setState({
       loggedIn: false,
-      studentName: '',
+      studentName: "",
     });
-  }
+  };
 
   render() {
     return (
       <div className="App">
-        {
-          (!this.state.loggedIn) ?
-            (<StudentForm onFormSubmit={this.onFormSubmit} />)
-            :
-            (<ClassItem name={this.state.studentName} onLoggedOutClicked={this.onLoggedOut}></ClassItem>)
-        }
+        {!this.state.loggedIn ? (
+          <StudentForm onFormSubmit={this.onFormSubmit} />
+        ) : (
+          <ClassList
+            name={this.state.studentName}
+            onLoggedOutClicked={this.onLoggedOut}
+          ></ClassList>
+        )}
       </div>
-    )
+    );
   }
 }
 

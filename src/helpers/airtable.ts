@@ -1,84 +1,52 @@
+import { Base, FieldSet, Record, Records, Table } from "airtable";
+
+export interface ClassType {
+    className: string;
+    studentNames: Array<string>;
+}
 
 class AirtableHelper {
-    public static getHeader() {
-        return {
-            'Accept': 'application/json',
-            'Content-Type': 'application/json',
-            'Authorization': 'Bearer keyzQvBweHZ7S3CVE',
+
+    public static async LoadDataUsingAPI(studentName: string) {
+        const result: ClassType[] = [];
+        const Airtable = require('airtable');
+        const base: Base = new Airtable({ apiKey: 'keyzQvBweHZ7S3CVE' }).base('app8ZbcPx7dkpOnP0');
+        const tableStudents: Table<FieldSet> = base('Students');
+        const tableClasses: Table<FieldSet> = base('Classes');
+        const studentData: Record<FieldSet> = (await tableStudents.select({
+            filterByFormula: `({Name}='${studentName}')`
+        }).firstPage())[0];
+
+        console.log(studentData.fields);
+
+        let classesList: string[] = studentData.fields.Classes as string[];
+
+        console.log(classesList);
+        for (let iPos = 0; iPos < classesList.length; iPos++) {
+            result.push(await AirtableHelper.getDataByClass(tableClasses, tableStudents, classesList[iPos]));
+        }
+        console.log(result);
+        return result;
+    }
+
+    public static async getDataByClass(classTable: Table<FieldSet>, studentsTable: Table<FieldSet>, id: string) {
+        let finalObject: ClassType = {
+            className: '',
+            studentNames: []
         };
+        const classFields: FieldSet = (await classTable.find(id)).fields;
+        console.log(classFields);
+        finalObject.className = classFields.Name as string;
+        const students: string[] = classFields.Students as string[];
+        for (let i = 0; i < students.length; i++) {
+            finalObject.studentNames.push(await AirtableHelper.getNameFromId(studentsTable, students[i]) as string);
+        }
+        // console.log(JSON.stringify(finalObject));
+        return finalObject;
     }
 
-    public static async LoadData(name: string) {
-        try {
-            const result = await fetch(
-                `https://api.airtable.com/v0/app8ZbcPx7dkpOnP0/Classes?maxRecords=3&view=Grid%20view`,
-                {
-                    method: 'GET',
-                    headers: this.getHeader(),
-                },
-            );
-            const json = await result.json();
-            console.log(json);
-            return json;
-        } catch (e: any) {
-            return e;
-        }
-    }
-
-    public static async LoadClassData(classId: string) {
-        try {
-            const result = await fetch(
-                `https://api.airtable.com/v0/app8ZbcPx7dkpOnP0/Classes/${classId}`,
-                {
-                    method: 'GET',
-                    headers: this.getHeader(),
-                },
-            );
-            const json = await result.json();
-            console.log(json);
-            return json;
-        } catch (e: any) {
-            console.log(e);
-            return null;
-        }
-    }
-
-    public static async LoadStudentData(studentId: string) {
-        try {
-            const result = await fetch(
-                `https://api.airtable.com/v0/app8ZbcPx7dkpOnP0/Students?filterByFormula=({Name}='${studentId}')`,
-                {
-                    method: 'GET',
-                    headers: this.getHeader(),
-                },
-            );
-            const json = await result.json();
-            console.log(json);
-            return json;
-        } catch (e: any) {
-            console.log(e);
-            return null;
-        }
-    }
-
-    public static LoadStudentDataUsingAPI(studentId: string, onCompleted: (data: any) => void) {
-        try {
-            var Airtable = require('airtable');
-            var base = new Airtable({ apiKey: 'keyzQvBweHZ7S3CVE' }).base('app8ZbcPx7dkpOnP0');
-            base('Students').select({
-                filterByFormula: `({Name}='${studentId}')`
-            }).eachPage(function page(records: any, fetchNextPage: any) {
-                onCompleted(records[0].fields);
-                // records.forEach(function (record: any) {
-                //     console.log('Retrieved', record.fields);
-                // });
-            }, function done(err: any) {
-                if (err) { console.error(err); return; }
-            });
-        } catch (e: any) {
-            console.log(e);
-            onCompleted(null);
-        }
+    public static async getNameFromId(tableName: Table<FieldSet>, id: string) {
+        return (await tableName.find(id)).fields.Name;
     }
 }
 
