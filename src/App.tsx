@@ -1,58 +1,51 @@
-import React from 'react';
-import logo from './logo.svg';
-import { Counter } from './features/counter/Counter';
+import React, { Component } from 'react'
 import './App.css';
+import ClassItem from './components/ClassItem';
+import StudentForm from './components/StudentForm';
 
-function App() {
-  return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <Counter />
-        <p>
-          Edit <code>src/App.tsx</code> and save to reload.
-        </p>
-        <span>
-          <span>Learn </span>
-          <a
-            className="App-link"
-            href="https://reactjs.org/"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            React
-          </a>
-          <span>, </span>
-          <a
-            className="App-link"
-            href="https://redux.js.org/"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Redux
-          </a>
-          <span>, </span>
-          <a
-            className="App-link"
-            href="https://redux-toolkit.js.org/"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Redux Toolkit
-          </a>
-          ,<span> and </span>
-          <a
-            className="App-link"
-            href="https://react-redux.js.org/"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            React Redux
-          </a>
-        </span>
-      </header>
-    </div>
-  );
+interface MyProps {
+};
+
+interface MyState {
+  loggedIn: boolean,
+  studentName: string
+};
+
+class App extends Component<MyProps, MyState> {
+  constructor(props: MyProps) {
+    super(props);
+    this.state = {
+      loggedIn: false,
+      studentName: ''
+    };
+  }
+
+  onFormSubmit = (name: string) => {
+    this.setState({
+      loggedIn: true,
+      studentName: name,
+    });
+  }
+
+  onLoggedOut = () => {
+    this.setState({
+      loggedIn: false,
+      studentName: '',
+    });
+  }
+
+  render() {
+    return (
+      <div className="App">
+        {
+          (!this.state.loggedIn) ?
+            (<StudentForm onFormSubmit={this.onFormSubmit} />)
+            :
+            (<ClassItem name={this.state.studentName} onLoggedOutClicked={this.onLoggedOut}></ClassItem>)
+        }
+      </div>
+    )
+  }
 }
 
 export default App;
